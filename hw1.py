@@ -7,19 +7,6 @@ import ssl
 # End of Allowed Modules
 # Adding any extra module will result into score of 0
 
-
-# def punycode_encode(input_str):
-#     output = []
-#     input_str = input_str.encode('utf-8')
-#     for char in input_str:
-#         if 0x61 <= char <= 0x7A:  # ASCII lowercase letters
-#             output.append(chr(char))
-#         elif char >= 0x80:  # Non-ASCII character
-#             output.append(f'x{char:02X}')
-    
-#     return ''.join(output)
-
-
 def retrieve_url(url):
     """
     return bytes of the body of the document at url
