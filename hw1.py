@@ -46,7 +46,9 @@ def retrieve_url(url):
         host = host_and_port
         
         # Converting emoji to readable domain
-        host = host.encode('idna')
+    host = host.encode('idna')
+    host = host.decode()
+    print(host)
         
     try: 
         # connecting client to server
