@@ -62,6 +62,8 @@ def retrieve_url(url):
     if schema == "https":
         client = context.wrap_socket(client, server_hostname=f"{host}")
         
+    redirects_followed = 0
+        
     try: 
         # connecting client to server
         client.connect((host, port))
@@ -86,6 +88,63 @@ def retrieve_url(url):
 
             # checking if 200 ok
             if b'200 OK' not in headers:
+                if b'301 Moved Permanently' in headers:
+                    for line in headers.split(b'\r\n'):
+                        if b'Location:' in line:
+                            location = line[len('Location: '):].decode()
+                            
+                            # print(location)
+                            # copy of url processing
+                            
+                            url = location
+                            # Set the server hostname for SNI (Server Name Indication) extension
+                            context.check_hostname = True
+                            context.verify_mode = ssl.CERT_REQUIRED
+                            context.load_default_certs()  # Load the system's CA certificates
+
+                            # Checking if url is http or https to determine port
+                            if url.startswith("http://"):
+                                schema = "http"
+                                url = url[len("http://"):]
+                                port = 80
+                            elif url.startswith("https://"):
+                                schema = "https"
+                                url = url[len("https://"):]
+                                port = 443
+                            else:
+                                return None
+
+                            # Extracting host and path from url
+                            if url.find("/") != -1:
+                                url = url.split("/", 1)
+                                host_and_port = url[0]
+                                path = url[1]
+                            else:
+                                host_and_port = url
+                                path = ""
+                                
+
+                            # Extracting host and port
+                            if host_and_port.find(":") != -1:
+                                host_and_port = host_and_port.split(":", 1)
+                                host = host_and_port[0]
+                                port = int(host_and_port[1])
+                            else:
+                                host = host_and_port
+                                
+                            # Converting emoji to readable domain
+                            host = host.encode('idna')
+                            host = host.decode()
+                            
+                            if schema == "https":
+                                client = context.wrap_socket(client, server_hostname=f"{host}")
+                                
+                            # print(host)
+                            # print(port)
+                                
+                            # Continue with the next request
+                            redirects_followed += 1
+                            continue
                 return None
             for line in headers.split(b'\r\n'):
                 # checking for content length in header
@@ -121,3 +180,5 @@ def retrieve_url(url):
 
 if __name__ == "__main__":
     sys.stdout.buffer.write(retrieve_url(sys.argv[1]))
+
+# retrieve_url("http://www.fieggen.com/shoelace")
