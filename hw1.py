@@ -15,13 +15,22 @@ def retrieve_url(url):
     # Creating client socket to connect to host
     # using IPv4 and TCP protocol
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    
+      # Create an SSL context with the default settings
+    context = ssl.create_default_context()
+
+    # Set the server hostname for SNI (Server Name Indication) extension
+    context.check_hostname = True
+    context.verify_mode = ssl.CERT_REQUIRED
+    context.load_default_certs()  # Load the system's CA certificates
 
     # Checking if url is http or https to determine port
     if url.startswith("http://"):
+        schema = "http"
         url = url[len("http://"):]
         port = 80
     elif url.startswith("https://"):
-        client = ssl.wrap_socket(client)
+        schema = "https"
         url = url[len("https://"):]
         port = 443
     else:
@@ -48,7 +57,10 @@ def retrieve_url(url):
         # Converting emoji to readable domain
     host = host.encode('idna')
     host = host.decode()
-    print(host)
+    # print(host)
+    
+    if schema == "https":
+        client = ssl.wrap_socket(client)
         
     try: 
         # connecting client to server
