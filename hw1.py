@@ -60,7 +60,7 @@ def retrieve_url(url):
     # print(host)
     
     if schema == "https":
-        client = ssl.wrap_socket(client)
+        client = context.wrap_socket(client, server_hostname=f"{host}")
         
     try: 
         # connecting client to server
