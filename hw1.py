@@ -70,12 +70,13 @@ def retrieve_url(url):
         # Sending request to server
         request = f"GET /{path} HTTP/1.1\r\nHost: {host}:{port}\r\n\r\n"
         client.send(request.encode())
-        response = b""
-        response_splits = b""
-        headers = b""
-        body = b""
         final_response = b""
         while True:
+            
+            response = b""
+            response_splits = b""
+            headers = b""
+            body = b""
             #  receiving response from server
             data = client.recv(4096)
             if not data:
@@ -94,13 +95,9 @@ def retrieve_url(url):
                             location = line[len('Location: '):].decode()
                             
                             # print(location)
-                            # copy of url processing
+                            # copy of url processing could have used function for this but it works so nevermind
                             
                             url = location
-                            # Set the server hostname for SNI (Server Name Indication) extension
-                            context.check_hostname = True
-                            context.verify_mode = ssl.CERT_REQUIRED
-                            context.load_default_certs()  # Load the system's CA certificates
 
                             # Checking if url is http or https to determine port
                             if url.startswith("http://"):
@@ -122,7 +119,6 @@ def retrieve_url(url):
                             else:
                                 host_and_port = url
                                 path = ""
-                                
 
                             # Extracting host and port
                             if host_and_port.find(":") != -1:
@@ -136,15 +132,28 @@ def retrieve_url(url):
                             host = host.encode('idna')
                             host = host.decode()
                             
+                            client.close()
+                            
+                            client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                            
                             if schema == "https":
                                 client = context.wrap_socket(client, server_hostname=f"{host}")
+                             
+                            
+                            try:
+                                client.connect((host,port))
+                                request = f"GET /{path} HTTP/1.1\r\nHost: {host}:{port}\r\n\r\n"
+                                # print(request)
+                                client.send(request.encode())
+                            except socket.error as exc:
+                                return None
+                                                
+                            
+                            
                                 
-                            # print(host)
-                            # print(port)
-                                
-                            # Continue with the next request
-                            redirects_followed += 1
-                            continue
+                    # Continue with the next request
+                    redirects_followed += 1
+                    continue          
                 return None
             for line in headers.split(b'\r\n'):
                 # checking for content length in header
@@ -170,7 +179,7 @@ def retrieve_url(url):
                 continue
             
             client.close()
-            # print(final_response)
+            print(final_response)
             return final_response
 
     except socket.error as exc:
@@ -178,7 +187,7 @@ def retrieve_url(url):
 
     # return b"this is unlikely to be correct"
 
-if __name__ == "__main__":
-    sys.stdout.buffer.write(retrieve_url(sys.argv[1]))
+# if __name__ == "__main__":
+#     sys.stdout.buffer.write(retrieve_url(sys.argv[1]))
 
-# retrieve_url("http://www.fieggen.com/shoelace")
+retrieve_url("http://www.fieggen.com/shoelace")
