@@ -168,12 +168,17 @@ def retrieve_url(url):
                 elif b'Transfer-Encoding: chunked' in line:
                     content_length,_,body_content = body.partition(b'\r\n')
                     content_length = int(content_length, 16)
+                    final_response += body_content[:content_length]
                     #  receiving data until the data is equal to its content length specified before the chunk
                     while content_length != 0:                        
-                        final_response += body_content[:content_length]
                         body = client.recv(4096)
                         content_length,_,body_content = body.partition(b'\r\n')
-                        content_length = int(content_length, 16)
+                        try:
+                            content_length = int(content_length, 16)
+                            final_response += body_content[:content_length]
+                        except Exception as exc:
+                            final_response += body
+                            continue
             # for persistant connections
             if b'100 Continue' in headers:
                 continue
