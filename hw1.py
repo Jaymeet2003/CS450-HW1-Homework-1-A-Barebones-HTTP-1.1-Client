@@ -57,7 +57,6 @@ def retrieve_url(url):
         # Converting emoji to readable domain
     host = host.encode('idna')
     host = host.decode()
-    # print(host)
     
     if schema == "https":
         client = context.wrap_socket(client, server_hostname=f"{host}")
@@ -93,8 +92,6 @@ def retrieve_url(url):
                     for line in headers.split(b'\r\n'):
                         if b'Location:' in line:
                             location = line[len('Location: '):].decode()
-                            
-                            # print(location)
                             # copy of url processing could have used function for this but it works so nevermind
                             
                             url = location
@@ -143,7 +140,6 @@ def retrieve_url(url):
                             try:
                                 client.connect((host,port))
                                 request = f"GET /{path} HTTP/1.1\r\nHost: {host}:{port}\r\n\r\n"
-                                # print(request)
                                 client.send(request.encode())
                             except socket.error as exc:
                                 return None
@@ -184,7 +180,6 @@ def retrieve_url(url):
                 continue
             
             client.close()
-            # print(final_response)
             return final_response
 
     except socket.error as exc:
