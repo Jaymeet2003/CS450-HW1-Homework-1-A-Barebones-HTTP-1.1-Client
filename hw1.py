@@ -179,7 +179,7 @@ def retrieve_url(url):
                 continue
             
             client.close()
-            print(final_response)
+            # print(final_response)
             return final_response
 
     except socket.error as exc:
@@ -187,7 +187,5 @@ def retrieve_url(url):
 
     # return b"this is unlikely to be correct"
 
-# if __name__ == "__main__":
-#     sys.stdout.buffer.write(retrieve_url(sys.argv[1]))
-
-retrieve_url("http://www.fieggen.com/shoelace")
+if __name__ == "__main__":
+    sys.stdout.buffer.write(retrieve_url(sys.argv[1]))
